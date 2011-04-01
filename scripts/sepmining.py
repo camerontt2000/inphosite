@@ -1,5 +1,6 @@
 import os.path
 from BeautifulSoup import BeautifulSoup
+from sqlalchemy.orm import subqueryload
 
 import datamining as dm
 from inphosite.model import *
@@ -23,9 +24,34 @@ def extract_article_body(filename):
 
     return body.text
 
+def process_article(title, entity_type=Idea, filename='output.txt'):
+    # process entities
+    ideas = Session.query(entity_type)
+    ideas = ideas.options(subqueryload('_spatterns'))
+    # do not process Nodes or Journals
+    ideas = ideas.filter(and_(Entity.typeID!=2, Entity.typeID!=4))
+    ideas = ideas.all()
+    
+    article = Session.query(Entity).filter(entity_type.sep_dir==title).first()
+    corpus_root = config['app_conf']['corpus']
+
+    with open(filename, 'w') as f:
+        filename = article.get_filename(corpus_root)
+        if filename and os.path.isfile(filename):
+            print "processing:", article.sep_dir
+            try: 
+                doc = extract_article_body(filename)
+                lines = dm.prepare_apriori_input(doc, ideas, article)
+                f.writelines(lines)
+            except:
+                print "ERROR PROCESSING:", article.sep_dir
+        else:
+            print "BAD SEP_DIR:", article.sep_dir
+
 def process_articles(entity_type=Idea, filename='output.txt'):
     # process entities
     ideas = Session.query(entity_type)
+    ideas = ideas.options(subqueryload('_spatterns'))
     # do not process Nodes or Journals
     ideas = ideas.filter(and_(Entity.typeID!=2, Entity.typeID!=4))
     ideas = ideas.all()
