@@ -248,10 +248,9 @@ def init_model(engine):
     #define idea relations
     mapper(Entity, entity_table, polymorphic_on=entity_table.c.typeID, polymorphic_identity=0, properties={
         'alias':relation(Alias), 
-        #'spatterns':relation(SearchPattern),
-            'spatterns':relation(SearchPattern, 
+        '_spatterns':relation(SearchPattern, 
             cascade="all,delete-orphan"),
-            })
+        })
     
     mapper(Idea, idea_table, inherits=Entity, polymorphic_on=entity_table.c.typeID, polymorphic_identity=1, properties={
         'links':relation(Idea, secondary=idea_link_to_table,
