@@ -534,6 +534,6 @@ class Entity(object):
 
         return search_string_list
 
-class Searchpattern(object):
+class SearchPattern(object):
     def __init__(self, searchpattern):
         self.searchpattern = searchpattern

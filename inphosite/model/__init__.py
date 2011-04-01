@@ -248,8 +248,8 @@ def init_model(engine):
     #define idea relations
     mapper(Entity, entity_table, polymorphic_on=entity_table.c.typeID, polymorphic_identity=0, properties={
         'alias':relation(Alias), 
-        #'spatterns':relation(Searchpattern),
-            'spatterns':relation(Searchpattern, 
+        #'spatterns':relation(SearchPattern),
+            'spatterns':relation(SearchPattern, 
             cascade="all,delete-orphan"),
             })
     
@@ -567,7 +567,7 @@ def init_model(engine):
     })
     mapper(Abbr, journal_abbr_table)
     mapper(SearchQuery, journal_search_query_table)
-    mapper(Searchpattern, searchpatterns_table)
+    mapper(SearchPattern, searchpatterns_table)
     
     #Define works mappings
     mapper(Work, work_table, inherits=Entity, polymorphic_identity=5, polymorphic_on=entity_table.c.typeID)
