@@ -30,8 +30,17 @@ def get_document_occurrences(document, terms, doc_term=None):
             try:
                 if re.search(' %s ' % term.label, document):
                     occurrences.add(term)
+                else:
+                    for pattern in term.searchpatterns:
+                        try:
+                            if re.search(pattern, document):
+                                occurrences.add(term)
+                                break
+                        except:
+                            print "ERROR HANDLING:", term.ID, pattern
             except:
                 print "ERROR HANDLING:", term.ID, term.label
+
     occurrences = list(occurrences)
 
     if doc_term:
