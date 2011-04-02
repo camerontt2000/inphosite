@@ -24,13 +24,17 @@ def extract_article_body(filename):
 
     return body.text
 
-def process_article(title, entity_type=Idea, filename='output.txt'):
+def select_terms(entity_type=Idea):
     # process entities
     ideas = Session.query(entity_type)
     ideas = ideas.options(subqueryload('_spatterns'))
     # do not process Nodes or Journals
     ideas = ideas.filter(and_(Entity.typeID!=2, Entity.typeID!=4))
-    ideas = ideas.all()
+    return ideas.all()
+     
+
+def process_article(title, entity_type=Idea, filename='output.txt'):
+    ideas = select_terms(entity_type)
     
     article = Session.query(Entity).filter(entity_type.sep_dir==title).first()
     corpus_root = config['app_conf']['corpus']
@@ -49,13 +53,8 @@ def process_article(title, entity_type=Idea, filename='output.txt'):
             print "BAD SEP_DIR:", article.sep_dir
 
 def process_articles(entity_type=Idea, filename='output.txt'):
-    # process entities
-    ideas = Session.query(entity_type)
-    ideas = ideas.options(subqueryload('_spatterns'))
-    # do not process Nodes or Journals
-    ideas = ideas.filter(and_(Entity.typeID!=2, Entity.typeID!=4))
-    ideas = ideas.all()
-
+    ideas = select_terms(entity_type)
+    
     articles = Session.query(entity_type).filter(entity_type.sep_dir!='').all()
     corpus_root = config['app_conf']['corpus']
 
