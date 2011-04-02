@@ -33,7 +33,7 @@ def select_terms(entity_type=Idea):
     return ideas.all()
      
 
-def process_article(article, entity_type=Idea, output_filename='output.txt', terms=None):
+def process_article(article, terms=None, entity_type=Idea, output_filename=None):
     if terms is None:
         terms = select_terms(entity_type)
     
@@ -59,14 +59,23 @@ def process_article(article, entity_type=Idea, output_filename='output.txt', ter
     else:
         return lines
 
-def process_articles(entity_type=Idea, filename='output.txt'):
+from multiprocessing import Pool
+
+def process_articles(entity_type=Idea, output_filename='output-test.txt'):
     terms = select_terms(entity_type)
     
     articles = Session.query(entity_type).filter(entity_type.sep_dir!='').all()
     corpus_root = config['app_conf']['corpus']
-    
+   
+    doc_lines = []
+
     for article in articles:
-        process_article(article, terms=terms)
+        lines = process_article(article, terms=terms, output_filename=None)
+        doc_lines.append(lines)
+
+    with open(output_filename, 'w'):
+        for lines in lines:
+            f.writelines(lines)
 
 import subprocess
 
