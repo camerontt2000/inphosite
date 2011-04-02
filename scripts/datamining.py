@@ -28,12 +28,13 @@ def get_document_occurrences(document, terms, doc_term=None):
     for term in terms:
         if term != doc_term:
             try:
-                if re.search(' %s ' % term.label, document):
+                if re.search('\b%s\b' % term.label, document,
+                                flags=re.IGNORECASE):
                     occurrences.add(term)
                 else:
                     for pattern in term.searchpatterns:
                         try:
-                            if re.search(pattern, document):
+                            if re.search(pattern, document, flags=re.IGNORECASE):
                                 occurrences.add(term)
                                 break
                         except:
