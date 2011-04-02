@@ -33,10 +33,11 @@ def select_terms(entity_type=Idea):
     return ideas.all()
      
 
-def process_article(title, entity_type=Idea, output_filename='output.txt'):
-    ideas = select_terms(entity_type)
+def process_article(article, entity_type=Idea, output_filename='output.txt', terms=None):
+    if terms is None:
+        terms = select_terms(entity_type)
     
-    article = Session.query(Entity).filter(entity_type.sep_dir==title).first()
+    #article = Session.query(Entity).filter(entity_type.sep_dir==title).first()
     corpus_root = config['app_conf']['corpus']
 
     lines = []
@@ -46,7 +47,7 @@ def process_article(title, entity_type=Idea, output_filename='output.txt'):
         print "processing:", article.sep_dir
         try: 
             doc = extract_article_body(filename)
-            lines = dm.prepare_apriori_input(doc, ideas, article)
+            lines = dm.prepare_apriori_input(doc, terms, article)
         except:
             print "ERROR PROCESSING:", article.sep_dir
     else:
@@ -59,24 +60,13 @@ def process_article(title, entity_type=Idea, output_filename='output.txt'):
         return lines
 
 def process_articles(entity_type=Idea, filename='output.txt'):
-    ideas = select_terms(entity_type)
+    terms = select_terms(entity_type)
     
     articles = Session.query(entity_type).filter(entity_type.sep_dir!='').all()
     corpus_root = config['app_conf']['corpus']
-
-    with open(filename, 'w') as f:
-        for article in articles:
-            filename = article.get_filename(corpus_root)
-            if filename and os.path.isfile(filename):
-                print "processing:", article.sep_dir
-                try: 
-                    doc = extract_article_body(filename)
-                    lines = dm.prepare_apriori_input(doc, ideas, article)
-                    f.writelines(lines)
-                except:
-                    print "ERROR PROCESSING:", article.sep_dir
-            else:
-                print "BAD SEP_DIR:", article.sep_dir
+    
+    for article in articles:
+        process_article(article, terms=terms)
 
 import subprocess
 
