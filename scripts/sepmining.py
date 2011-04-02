@@ -33,24 +33,30 @@ def select_terms(entity_type=Idea):
     return ideas.all()
      
 
-def process_article(title, entity_type=Idea, filename='output.txt'):
+def process_article(title, entity_type=Idea, output_filename='output.txt'):
     ideas = select_terms(entity_type)
     
     article = Session.query(Entity).filter(entity_type.sep_dir==title).first()
     corpus_root = config['app_conf']['corpus']
 
-    with open(filename, 'w') as f:
-        filename = article.get_filename(corpus_root)
-        if filename and os.path.isfile(filename):
-            print "processing:", article.sep_dir
-            try: 
-                doc = extract_article_body(filename)
-                lines = dm.prepare_apriori_input(doc, ideas, article)
-                f.writelines(lines)
-            except:
-                print "ERROR PROCESSING:", article.sep_dir
-        else:
-            print "BAD SEP_DIR:", article.sep_dir
+    lines = []
+
+    filename = article.get_filename(corpus_root)
+    if filename and os.path.isfile(filename):
+        print "processing:", article.sep_dir
+        try: 
+            doc = extract_article_body(filename)
+            lines = dm.prepare_apriori_input(doc, ideas, article)
+        except:
+            print "ERROR PROCESSING:", article.sep_dir
+    else:
+        print "BAD SEP_DIR:", article.sep_dir
+
+    if output_filename:
+        with open(output_filename, 'w') as f:
+            f.writelines(lines)
+    else:
+        return lines
 
 def process_articles(entity_type=Idea, filename='output.txt'):
     ideas = select_terms(entity_type)
