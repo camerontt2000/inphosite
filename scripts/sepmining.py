@@ -37,7 +37,6 @@ def process_article(article, terms=None, entity_type=Idea, output_filename=None)
     if terms is None:
         terms = select_terms(entity_type)
     
-    #article = Session.query(Entity).filter(entity_type.sep_dir==title).first()
     corpus_root = config['app_conf']['corpus']
 
     lines = []
@@ -61,20 +60,25 @@ def process_article(article, terms=None, entity_type=Idea, output_filename=None)
 
 from multiprocessing import Pool
 
+def process_wrapper(args):
+    return process_article(*args)
+
 def process_articles(entity_type=Idea, output_filename='output-test.txt'):
     terms = select_terms(entity_type)
+    Session.expunge_all()
     
     articles = Session.query(entity_type).filter(entity_type.sep_dir!='').all()
     corpus_root = config['app_conf']['corpus']
    
-    doc_lines = []
+    # parallel processing of articles
+    p = Pool()
+    args = [(title, terms) for title in articles]
+    doc_lines = p.map(process_wrapper, args)
+    p.close()
 
-    for article in articles:
-        lines = process_article(article, terms=terms, output_filename=None)
-        doc_lines.append(lines)
-
+    # write graph output to file
     with open(output_filename, 'w') as f:
-        for lines in lines:
+        for lines in doc_lines:
             f.writelines(lines)
 
 import subprocess
