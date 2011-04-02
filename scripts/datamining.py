@@ -27,20 +27,18 @@ def get_document_occurrences(document, terms, doc_term=None):
     # iterate over terms to be scanned
     for term in terms:
         if term != doc_term:
+            pattern = ''
             try:
                 if re.search('\b%s\b' % term.label, document,
                                 flags=re.IGNORECASE):
                     occurrences.add(term)
                 else:
                     for pattern in term.searchpatterns:
-                        try:
-                            if re.search(pattern, document, flags=re.IGNORECASE):
-                                occurrences.add(term)
-                                break
-                        except:
-                            print "ERROR HANDLING:", term.ID, pattern
+                        if re.search(pattern, document, flags=re.IGNORECASE):
+                            occurrences.add(term)
+                            break
             except:
-                print "ERROR HANDLING:", term.ID, term.label
+                print "ERROR HANDLING:", term.ID, term.label, pattern
 
     occurrences = list(occurrences)
 
