@@ -73,7 +73,7 @@ def process_articles(entity_type=Idea, output_filename='output-test.txt'):
         lines = process_article(article, terms=terms, output_filename=None)
         doc_lines.append(lines)
 
-    with open(output_filename, 'w'):
+    with open(output_filename, 'w') as f:
         for lines in lines:
             f.writelines(lines)
 
